@@ -1,0 +1,249 @@
+// const express = require('express');
+// const multer = require('multer');
+// const AWS = require('aws-sdk');
+// const path = require('path');
+// const { exec } = require('child_process');
+// const fs = require('fs');
+// const HLS = require('hls-server');
+
+// const app = express();
+// const port = 3001;
+
+// const cors = require('cors');
+// app.use(cors());
+
+// // Configure AWS SDK
+// AWS.config.update({
+//     accessKeyId: 'AKIASTXNE2QXZOEYG3GW',
+//     secretAccessKey: '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',
+//     region: 'us-east-1'
+// });
+
+// const s3 = new AWS.S3();
+// const upload = multer({ dest: 'uploads/' });
+
+// // Endpoint to upload video
+// app.post('/upload', upload.single('video'), (req, res) => {
+//     const file = req.file;
+//     const outputDir = path.join(__dirname, 'transcoded', file.filename);
+
+//     // Create output directory if it doesn't exist
+//     if (!fs.existsSync(outputDir)){
+//         fs.mkdirSync(outputDir, { recursive: true });
+//     }
+//     let originalString = file.path;
+//     let modifiedString = originalString.replace(/\\\\/g, '\\');
+
+//     const hls_segment_filename_add = outputDir+'//stream_%v//seg_%03d.ts'
+//     const hls_segment_filename = hls_segment_filename_add.replace(/\/\//g, '\\');
+
+//     const master_pl_name_add = outputDir+'//master.m3u8'
+//     const master_pl_name = master_pl_name_add.replace(/\/\//g, '\\');
+
+//     const var_stream_map_add = outputDir+'//stream_%v.m3u8'
+//     const var_stream_map = var_stream_map_add.replace(/\/\//g, '\\');
+
+//     const command = `ffmpeg -i ${file.path} -preset veryfast -g 48 -sc_threshold 0 \
+//     -map 0:0 -s:v:0 1920x1080 -b:v:0 5000k \
+//     -map 0:0 -s:v:1 1280x720 -b:v:1 2800k \
+//     -map 0:0 -s:v:2 854x480 -b:v:2 1400k \
+//     -map 0:0 -s:v:3 640x360 -b:v:3 800k \
+//     -map 0:0 -s:v:4 426x240 -b:v:4 400k \
+//     -c:a copy \
+//     -f hls \
+//     -hls_time 4 \
+//     -hls_playlist_type vod \
+//     -hls_segment_filename '${hls_segment_filename}' \
+//     -master_pl_name ${master_pl_name} \
+//     -var_stream_map "v:0,a:0 v:1,a:1 v:2,a:2 v:3,a:3 v:4,a:4" ${var_stream_map}`;
+    
+//     exec(command, (err, stdout, stderr) => {
+//         if (err) {
+//             console.log('.........................................this is my Error...................................................... : ', err.message);
+//             return res.status(500).send(err.cmd);
+//         }
+//         return
+//         // Upload transcoded files to S3
+//         const uploadToS3 = (filePath, key) => {
+//             const fileContent = fs.readFileSync(filePath);
+//             const params = {
+//                 Bucket: 'sparkdevbucket',
+//                 Key: key,
+//                 Body: fileContent
+//             };
+//             return s3.upload(params).promise();
+//         };
+
+//         const files = fs.readdirSync(outputDir);
+//         const uploadPromises = files.map(file => {
+//             const filePath = path.join(outputDir, file);
+//             const s3Key = `videos/${file.filename}/${file}`;
+//             return uploadToS3(filePath, s3Key);
+//         });
+
+//         Promise.all(uploadPromises)
+//             .then(() => {
+//                 // Return the URL to the master playlist file
+//                 const masterUrl = `https://sparkdevbucket.s3.us-east-1.amazonaws.com/videos/${file.filename}/master.m3u8`;
+//                 res.send(masterUrl);
+//             })
+//             .catch(err => {
+//                 console.error(`S3 Upload Error: ${err}`);
+//                 res.status(500).send('Error in uploading to S3');
+//             });
+//     });
+// });
+
+
+// // Endpoint to fetch video URL
+// app.get('/video-url/:videoId', (req, res) => {
+//     const videoId = req.params.videoId;
+//     const masterUrl = `https://sparkdevbucket.s3.us-east-1.amazonaws.com/videos/${videoId}/master.m3u8`;
+//     res.send(masterUrl);
+// });
+
+// // Endpoint to fetch video (HLS streaming)
+// new HLS(app, {
+//     provider: {
+//         exists: (req, cb) => {
+//             const ext = req.url.split('.').pop();
+
+//             if (ext !== 'm3u8' && ext !== 'ts') {
+//                 return cb(null, true);
+//             }
+
+//             const s3Key = `videos${req.url}`;
+//             s3.headObject({ Bucket: 'sparkdevbucket', Key: s3Key }, (err, data) => {
+//                 if (err) {
+//                     console.log('File not exist');
+//                     return cb(null, false);
+//                 }
+//                 cb(null, true);
+//             });
+//         },
+//         getManifestStream: (req, cb) => {
+//             const s3Key = `videos${req.url}`;
+//             const stream = s3.getObject({ Bucket: 'sparkdevbucket', Key: s3Key }).createReadStream();
+//             cb(null, stream);
+//         },
+//         getSegmentStream: (req, cb) => {
+//             const s3Key = `videos${req.url}`;
+//             const stream = s3.getObject({ Bucket: 'sparkdevbucket', Key: s3Key }).createReadStream();
+//             cb(null, stream);
+//         }
+//     }
+// });
+
+// app.listen(port, () => {
+//     console.log(`Server is running on port ${port}`);
+
+// });
+==========================================================
+// // Create a new instance of AWS MediaConvert and S3
+// const mediaconvert = new AWS.MediaConvert();
+// const s3 = new AWS.S3();
+
+// // Multer setup for handling file uploads
+// const storage = multer.memoryStorage();
+// const upload = multer({ storage: storage });
+
+// // Define route to trigger MediaConvert job and S3 upload via POSTMAN
+// app.post('/encodeAndUpload', upload.single('video'), (req, res) => {
+//   if (!req.file) {
+//     return res.status(400).json({ error: 'No file uploaded' });
+//   }
+  
+//   // Define parameters for creating a job
+//   const params = {
+//     Queue: 'arn:aws:mediaconvert:us-east-1:179812226095:queues/Default', // Specify your MediaConvert queue
+//     Role: 'arn:aws:iam::179812226095:role/testMediaConvert', // Specify IAM role for MediaConvert
+//     Settings: {
+//       OutputGroups: [
+//         {
+//           Name: 'File Group',
+//           OutputGroupSettings: {
+//             Type: 'FILE_GROUP_SETTINGS',
+//             FileGroupSettings: {
+//               Destination: `s3://sparkdevbucket/output/`, // Specify your S3 bucket for outputs
+//             },
+//           },
+//           Outputs: [
+//             {
+//               Preset: 'System preset: Adaptive Bitrate',
+//               Extension: 'mp4',
+//               NameModifier: '-1080p', // Output name modifier for resolution
+//             },
+//             // Add more Outputs for different resolutions (e.g., 720p, etc.)
+//           ],
+//         },
+//       ],
+//       Inputs: [
+//         {
+//           FileInput: `s3://sparkdevbucket/input/${req.file.originalname}`, // Specify your input video location
+//         },
+//       ],
+//     },
+//   };
+  
+  
+
+//   // Create MediaConvert job
+//   mediaconvert.createJob(params, function(err, data) {
+//     if (err) {
+//       console.log("Error creating MediaConvert job:", err);
+//       return res.status(500).json({ error: 'Error creating MediaConvert job' });
+//     } else {
+//       console.log("MediaConvert job created successfully:", data);
+
+//       // Assuming job created successfully, now upload the video to S3
+//       const params = {
+//         Bucket: process.env.Bucketname,
+//         Key: `input/${req.file.originalname}`, // S3 key where you want to upload the video
+//         Body: req.file.buffer,
+//         ContentType: req.file.mimetype
+//       };
+      
+//       // Upload video to S3
+//       s3.upload(params, function(err, s3data) {
+//         if (err) {
+//           console.log("Error uploading video to S3:", err);
+//           return res.status(500).json({ error: 'Error uploading video to S3' });
+//         } else {
+//           console.log("Video uploaded successfully to S3:", s3data.Location);
+//           return res.status(200).json({ message: 'Video uploaded successfully to S3', location: s3data.Location });
+//         }
+//       });
+//     }
+//   });
+// });
+
+=========================
+// app.post('/post-videos', upload.single('video'), async (req,res)=>{
+//     const params= {
+//         Bucket: 'devsparkbucket',
+//         Key: req.file.originalname,
+//         Body: req.file.buffer,
+//         ContentType:  req.file.mimetype
+
+//     }
+
+//     try {
+//         const upload = new Upload({
+//             client: s3,
+//             params,
+//             leavePartsOnError: false,
+//         });
+
+//         upload.on('httpUploadProgress', (progress) => {
+//             const percentage = (progress.loaded / progress.total) * 100;
+//             console.log(`Upload progress: ${percentage.toFixed(2)}%`);
+//             // You can optionally log the progress to monitor on the server side
+//         });
+
+//         await upload.done();
+//         res.status(200).send('Upload complete');
+//     } catch (error) {
+//         console.error('Error uploading:', error);
+//         res.status(500).send('Error uploading file');
+//     }
+// })

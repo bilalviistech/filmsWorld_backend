@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Progress</title>
+</head>
+<body>
+    <input type="file" id="fileInput" />
+    <button id="uploadButton">Upload</button>
+    <div id="progress">0%</div>
+
+    <script>
+        const eventSource = new EventSource('http://localhost:3001/events');
+
+        eventSource.onmessage = (event) => {
+            const percentage = event.data;
+            document.getElementById('progress').innerText = `${percentage}%`;
+        };
+
+        document.getElementById('uploadButton').addEventListener('click', () => {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const formData = new FormData();
+                formData.append('video', file);
+
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'http://localhost:3001/post-videos', true);
+
+                xhr.addEventListener('load', () => {
+                    if (xhr.status === 200) {
+                        document.getElementById('progress').innerText = 'Upload complete';
+                    } else {
+                        document.getElementById('progress').innerText = 'Upload failed';
+                    }
+                });
+
+                xhr.send(formData);
+            }
+        });
+    </script>
+</body>
+</html>
