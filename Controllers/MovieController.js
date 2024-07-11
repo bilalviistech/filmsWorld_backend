@@ -1,4 +1,7 @@
 const Movie = require('../Models/MovieModel')
+const Favorite = require('../Models/FavoriteMovieModel');
+const MovieModel = require('../Models/MovieModel');
+const mongoose = require('mongoose')
 
 class MovieController {
     static GetAllMovie = async (req, res) => {
@@ -73,6 +76,50 @@ class MovieController {
                 pagingCounter: AllMovie.pagingCounter,
                 nextPage: AllMovie.nextPage
             })
+
+        } catch (error) {
+            res.status(200).json({
+                success: false,
+                message: error.message
+            })
+        }
+    }
+
+    static WatchLater = async (req, res) => {
+        try {
+            const MovieId = req.params.movieId
+            const UserId = req.user._id
+            
+            const MovieExist = await Movie.findOne({_id: MovieId})
+
+            if(MovieExist){
+
+                const AddedFavorite = await Favorite.findOne({UserId: UserId, MovieId: MovieId})
+                if(AddedFavorite){
+                    await Favorite.deleteOne({ _id: AddedFavorite._id });
+                    return res.status(200).json({
+                        success: true,
+                        message: "Removed from watch later."
+                    })    
+                }
+                const AddFavorite = new Favorite({
+                    _id: new mongoose.Types.ObjectId(),
+                    UserId: req.user._id,
+                    MovieId: MovieId
+                })
+                await AddFavorite.save()
+
+                res.status(200).json({
+                    success: true,
+                    message: "Added in watch later."
+                })
+            }
+            else{
+                res.status(200).json({
+                    success: false,
+                    message: "Movie doesn't exist."
+                })
+            }
 
         } catch (error) {
             res.status(200).json({
