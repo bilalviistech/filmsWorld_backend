@@ -21,6 +21,7 @@ Route.post('/user/login', AuthController.Login)
 // Route.post('/admin/add-movie', upload.single('video'), PicUpload.single('thumbnail'), AuthController.AddMovie)
 Route.post('/admin/add-movie', upload.fields([ { name: 'video', maxCount: 1 }, { name: 'thumbnail', maxCount: 1 } ]), AuthController.AddMovie);
 Route.post('/admin/events', AuthController.Events)
+Route.post('/admin/add-banner', upload.single('banner'), AuthController.AddBanner);
 
 // App Routes
 // Movie Routes

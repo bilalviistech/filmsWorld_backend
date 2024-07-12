@@ -3,6 +3,7 @@ const { Upload } = require('@aws-sdk/lib-storage');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3')
 const mongoose = require('mongoose')
 const Movie = require('../Models/MovieModel')
+const Banner = require('../Models/BannerModel')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const User = require('../Models/UserModel')
@@ -191,7 +192,47 @@ class AuthController {
 
     }
 
+    static AddBanner = async (req, res) => {
 
+        const currentDate = Date.now()
+        const BannerObj = req.file;
+
+        const BannerParams = {
+            Bucket: process.env.Bucketname,
+            Key: `Banner/${currentDate}_${BannerObj.originalname}`,
+            Body: BannerObj.buffer,
+            ContentType: BannerObj.mimetype,
+        };
+
+        try {
+            const BannerUpload = new Upload({
+                client: s3,
+                params: BannerParams,
+                leavePartsOnError: false,
+            });
+            await BannerUpload.done();
+
+            if (BannerUpload) {
+                const newBanner = new Banner({
+                    _id: new mongoose.Types.ObjectId(),
+                    Banner: BannerParams.Key,
+                })
+                await newBanner.save()
+            }
+
+            res.status(200).json({
+                success: true,
+                message: "Your Banner Has Been Uploaded."
+            });
+
+        } catch (error) {
+            console.error('Error uploading:', error);
+            res.status(200).json({
+                success: false,
+                message: error.message
+            });
+        }
+    }
 
     static Events = async (req, res) => {
         res.setHeader('Content-Type', 'text/event-stream');
