@@ -29,6 +29,7 @@ Route.get('/user/get-all-movies', AuthMiddleware, MovieController.GetAllMovie)
 Route.get('/user/get-movies-title/:title', AuthMiddleware, MovieController.GetMoviesByTitle)
 Route.get('/user/get-movies-category/:category', AuthMiddleware, MovieController.GetMoviesByCategory)
 Route.post('/user/watch-later/:movieId', AuthMiddleware, MovieController.WatchLater)
+Route.get('/user/get-banner', AuthMiddleware, MovieController.GetBanner)
 
 
 module.exports = Route
