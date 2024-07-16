@@ -248,6 +248,7 @@ class MovieController {
         
             return res.status(200).json({
                 success: true,
+                path: process.env.movieDomainURL,
                 data: obj
             });
 
