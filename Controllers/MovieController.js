@@ -1,7 +1,7 @@
 const Movie = require('../Models/MovieModel')
 const Favorite = require('../Models/FavoriteMovieModel');
-const MovieModel = require('../Models/MovieModel');
 const Banner = require('../Models/BannerModel')
+const Watched = require('../Models/WatchedModel')
 const mongoose = require('mongoose')
 const dotenv = require('dotenv')
 dotenv.config()
@@ -340,6 +340,80 @@ class MovieController {
         }
     }
 
+    static WatchNowPost = async(req,res)=>{
+        try {
+            const UserId = req.user._id
+            const MovieId = req.params.movieId
+
+            const ExistWatch = await Watched.findOne({UserId: UserId, MovieId: MovieId})
+            if(ExistWatch){
+                return res.status(200).json({
+                    success: true,
+                    message: "Already added in watch now history"
+                })
+            }
+
+            const newWatched = new Watched({
+                _id: new mongoose.Types.ObjectId(),
+                UserId: UserId,
+                MovieId: MovieId
+            })
+            await newWatched.save()
+
+            res.status(200).json({
+                success: true,
+                message: "Added in watch now history"
+            })
+        } catch (error) {
+            res.status(200).json({
+                success: false,
+                message: error.message
+            })
+        }
+    }
+
+    static GetAllWatchNow = async(req,res)=>{
+        try {
+            const UserId = req.user._id
+            const GetAllWatch = await Watched.find({ UserId: UserId})
+
+            if(GetAllWatch){
+                const movieObj =[]
+
+                for(let i=0; i< GetAllWatch.length; i++){
+                   const MovieDetail = await Movie.findOne({_id: GetAllWatch[i].MovieId})
+                   movieObj.push({
+                        _id: GetAllWatch._id,
+                        UserId: UserId,
+                        MovieId: MovieDetail?._id,
+                        movieTitle: MovieDetail?.movieTitle,
+                        movieCategory: MovieDetail?.movieCategory,
+                        movieDescription: MovieDetail?.movieDescription,
+                        thumbnailLink: MovieDetail?.thumbnailLink,
+                        movieLink: MovieDetail?.movieLink,
+                   })
+                }
+    
+                res.status(200).json({
+                    success: true,
+                    data: movieObj
+                })
+            }
+            else{
+                res.status(200).json({
+                    success: false,
+                    message: "No watch history found."
+                })
+            }
+
+        } catch (error) {
+            res.status(200).json({
+                success: false,
+                data: error.message
+            })
+        }
+    }
+
     static WatchLater = async (req, res) => {
         try {
             const MovieId = req.params.movieId
@@ -380,6 +454,22 @@ class MovieController {
             res.status(200).json({
                 success: false,
                 message: error.message
+            })
+        }
+    }
+
+    static GetAllWatchLater = async (req, res) => {
+        try {
+            const AllFavorite = await Favorite.find()
+
+            res.status(200).json({
+                success: true,
+                data: AllFavorite
+            })
+        } catch (error) {
+            res.status(200).json({
+                success: false,
+                data: error.message
             })
         }
     }

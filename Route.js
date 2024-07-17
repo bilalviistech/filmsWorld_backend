@@ -16,6 +16,7 @@ DB()
 
 // Auth
 Route.post('/user/register', AuthController.Register)
+Route.post('/user/social-auth-register', AuthController.SocialAuthRegister)
 Route.post('/user/login', AuthController.Login)
 
 // Route.post('/admin/add-movie', upload.single('video'), PicUpload.single('thumbnail'), AuthController.AddMovie)
@@ -28,7 +29,16 @@ Route.post('/admin/add-banner', upload.single('banner'), AuthController.AddBanne
 Route.get('/user/get-all-movies', AuthMiddleware, MovieController.GetAllMovie)
 Route.get('/user/get-movies-title/:title', AuthMiddleware, MovieController.GetMoviesByTitle)
 Route.get('/user/get-movies-category/:category', AuthMiddleware, MovieController.GetMoviesByCategory)
+
+// watch later
 Route.post('/user/watch-later/:movieId', AuthMiddleware, MovieController.WatchLater)
+Route.get('/user/get-all-watch-later', AuthMiddleware, MovieController.GetAllWatchLater)
+
+// Watch Now
+Route.post('/user/watch-now/:movieId', AuthMiddleware, MovieController.WatchNowPost)
+Route.get('/user/get-all-watch-now', AuthMiddleware, MovieController.GetAllWatchNow)
+
+// Banner
 Route.get('/user/get-banner', AuthMiddleware, MovieController.GetBanner)
 
 

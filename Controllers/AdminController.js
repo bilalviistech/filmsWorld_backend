@@ -58,6 +58,60 @@ class AuthController {
         }
     }
 
+    static SocialAuthRegister = async (req, res) => {
+        const { name, email } = req.body
+        const UserExist = await User.findOne({email, email})
+        if(UserExist)
+        {
+            bcrypt.compare('123456789', UserExist.password, (err, result) => {
+                if (result) {
+                    const token = jwt.sign({
+                        id: UserExist._id,
+                        name: UserExist.name,
+                        email: UserExist.email,
+                    },
+                        process.env.AppToken
+                    )
+                    res.status(200).json({
+                        success: true,
+                        data: {
+                            id: UserExist.id,
+                            name: UserExist.name,
+                            email: UserExist.email,
+                            token: token
+                        }
+
+                    });
+                }
+                else {
+                    res.status(200).json({
+                        success: false,
+                        message: "Password doesn't match."
+                    })
+                }
+            })
+             
+        }
+        else
+        {
+            const salt = await bcrypt.genSalt(10);
+            const hash = await bcrypt.hash('123456789', salt);
+
+            const newUser = new User({
+                _id: new mongoose.Types.ObjectId(),
+                name: name,
+                email: email,
+                password: hash,
+            })
+            await newUser.save()
+
+            res.status(200).json({
+                success: true,
+                message: "You have registered successfully."
+            }); 
+        }
+    }
+
     static Login = async (req, res) => {
         const { email, password } = req.body
         const UserExist = await User.findOne({ email: email })
