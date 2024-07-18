@@ -27,6 +27,7 @@ Route.post('/admin/add-banner', upload.single('banner'), AuthController.AddBanne
 // App Routes
 // Movie Routes
 Route.get('/user/get-all-movies', AuthMiddleware, MovieController.GetAllMovie)
+Route.get('/user/get-titles', AuthMiddleware, MovieController.GetMovieTitles)
 Route.get('/user/get-movies-title/:title', AuthMiddleware, MovieController.GetMoviesByTitle)
 Route.get('/user/get-movies-category/:category', AuthMiddleware, MovieController.GetMoviesByCategory)
 

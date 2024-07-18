@@ -286,6 +286,25 @@ class MovieController {
 
     }
 
+    static GetMovieTitles = async(req, res)=>{
+        try {
+            const title  = req.query.title
+
+            const AllMovieTitles = await Movie.find({ movieTitle: { $regex: title, $options: 'i' } }).select('movieTitle');
+    
+            res.status(200).json({
+                success: true,
+                data: AllMovieTitles
+            })
+        } catch (error) {
+            res.status(200).json({
+                success: false,
+                message: error.message
+            })
+        }
+
+    }
+
     static GetMoviesByTitle = async (req, res) => {
         try {
             const title = req.params.title
