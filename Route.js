@@ -6,6 +6,7 @@ const upload = multer({ storage: storage})
 const AuthMiddleware = require('./Middleware/AuthMiddleware')
 const AuthController = require('./Controllers/AdminController')
 const MovieController = require('./Controllers/MovieController')
+const SeriesController = require('./Controllers/SeriesController')
 const DB = require('./Config/ConnectDB')
 DB()
 
@@ -41,6 +42,14 @@ Route.get('/user/get-all-watch-now', AuthMiddleware, MovieController.GetAllWatch
 
 // Banner
 Route.get('/user/get-banner', AuthMiddleware, MovieController.GetBanner)
+
+// Series
+Route.post('/user/add-series', AuthMiddleware, upload.single('series'), SeriesController.AddSeries)
+Route.get('/user/get-series', AuthMiddleware, SeriesController.GetAllSeries)
+
+// Add episode
+Route.post('/user/addepisodes/:seriesid', AuthMiddleware, upload.single('episode'), SeriesController.AddEpisodes)
+Route.get('/user/get-episodes-by-series/:SeriesId', AuthMiddleware, SeriesController.GetEpisodesBySeries)
 
 
 module.exports = Route
