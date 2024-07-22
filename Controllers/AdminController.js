@@ -246,6 +246,37 @@ class AuthController {
 
     }
 
+    static TrendingMovie = async (req, res) => {
+        try {
+            const MovieId = req.params.Movieid
+
+            const MovieExist = await Movie.findOneAndUpdate({_id: MovieId}, {
+                $set: {
+                    movieTrending: true
+                }
+            })
+            
+            if(!MovieExist){
+                return res.status(200).json({
+                    success: false,
+                    message: "No movie found."
+                })
+            }
+    
+            res.status(200).json({
+                success: true,
+                message: "Movie has been trending now."
+            })
+
+        } catch (error) {
+            res.status(200).json({
+                success: false,
+                message: error.message
+            })
+        }
+
+    }
+
     static AddBanner = async (req, res) => {
 
         const currentDate = Date.now()

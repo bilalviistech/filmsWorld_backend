@@ -10,7 +10,7 @@ class MovieController {
     static GetAllMovie = async (req, res) => {
         try {
 
-            const categories  = [
+            const categories = [
                 "Bollywood",
                 "Hollywood",
                 "Pakistani",
@@ -236,16 +236,16 @@ class MovieController {
             const PageNumber = parseInt(req.query.page) || 1;
             const PageLimitData = 10;
             const obj = [];
-        
+
             const startIndex = (PageNumber - 1) * PageLimitData;
             const endIndex = startIndex + PageLimitData;
             const categoriesToFetch = categories.slice(startIndex, endIndex);
-        
+
             for (const category of categoriesToFetch) {
                 const movies = await Movie.paginate({ movieCategory: category }, { page: 1, limit: PageLimitData });
                 obj.push({ category, movies });
             }
-        
+
             return res.status(200).json({
                 success: true,
                 path: process.env.movieDomainURL,
@@ -264,7 +264,7 @@ class MovieController {
 
             // console.log(obj)
             // return
-            
+
 
             // res.status(200).json({
             //     success: true,
@@ -286,12 +286,12 @@ class MovieController {
 
     }
 
-    static GetMovieTitles = async(req, res)=>{
+    static GetMovieTitles = async (req, res) => {
         try {
-            const title  = req.query.title
+            const title = req.query.title
 
             const AllMovieTitles = await Movie.find({ movieTitle: { $regex: title, $options: 'i' } }).select('movieTitle');
-    
+
             res.status(200).json({
                 success: true,
                 data: AllMovieTitles
@@ -359,13 +359,29 @@ class MovieController {
         }
     }
 
-    static WatchNowPost = async(req,res)=>{
+    static GetTrendingMovies = async (req, res) => {
+        try {
+            const GetTrendingMovie = await Movie.find({ movieTrending: true }).sort({ _id: 1 }).limit(3);
+
+            res.status(200).json({
+                success: true,
+                data: GetTrendingMovie
+            })
+        } catch (error) {
+            res.status(200).json({
+                success: false,
+                data: error.message
+            })
+        }
+    }
+
+    static WatchNowPost = async (req, res) => {
         try {
             const UserId = req.user._id
             const MovieId = req.params.movieId
 
-            const ExistWatch = await Watched.findOne({UserId: UserId, MovieId: MovieId})
-            if(ExistWatch){
+            const ExistWatch = await Watched.findOne({ UserId: UserId, MovieId: MovieId })
+            if (ExistWatch) {
                 return res.status(200).json({
                     success: true,
                     message: "Already added in watch now history"
@@ -391,17 +407,17 @@ class MovieController {
         }
     }
 
-    static GetAllWatchNow = async(req,res)=>{
+    static GetAllWatchNow = async (req, res) => {
         try {
             const UserId = req.user._id
-            const GetAllWatch = await Watched.find({ UserId: UserId})
+            const GetAllWatch = await Watched.find({ UserId: UserId })
 
-            if(GetAllWatch){
-                const movieObj =[]
+            if (GetAllWatch) {
+                const movieObj = []
 
-                for(let i=0; i< GetAllWatch.length; i++){
-                   const MovieDetail = await Movie.findOne({_id: GetAllWatch[i].MovieId})
-                   movieObj.push({
+                for (let i = 0; i < GetAllWatch.length; i++) {
+                    const MovieDetail = await Movie.findOne({ _id: GetAllWatch[i].MovieId })
+                    movieObj.push({
                         _id: GetAllWatch._id,
                         UserId: UserId,
                         MovieId: MovieDetail?._id,
@@ -410,15 +426,15 @@ class MovieController {
                         movieDescription: MovieDetail?.movieDescription,
                         thumbnailLink: MovieDetail?.thumbnailLink,
                         movieLink: MovieDetail?.movieLink,
-                   })
+                    })
                 }
-    
+
                 res.status(200).json({
                     success: true,
                     data: movieObj
                 })
             }
-            else{
+            else {
                 res.status(200).json({
                     success: false,
                     message: "No watch history found."
@@ -480,11 +496,37 @@ class MovieController {
     static GetAllWatchLater = async (req, res) => {
         try {
             const AllFavorite = await Favorite.find()
+            const MovieObj = []
 
-            res.status(200).json({
-                success: true,
-                data: AllFavorite
-            })
+            if (AllFavorite.length > 0) {
+
+                for (let i = 0; i < AllFavorite.length; i++) {
+                    const MoveInfo = await Movie.findById(AllFavorite[i].MovieId)
+                    MovieObj.push({
+                        _id: AllFavorite[i]._id,
+                        UserId: req.user._id,
+                        MovieId: MoveInfo._id,
+                        movieTitle: MoveInfo.movieTitle,
+                        movieCategory: MoveInfo.movieCategory,
+                        movieDescription: MoveInfo.movieDescription,
+                        thumbnailLink: MoveInfo.thumbnailLink,
+                        movieLink: MoveInfo.movieLink,
+                    })
+
+                    res.status(200).json({
+                        success: true,
+                        data: MovieObj
+                    })
+                }
+            }
+            else {
+                res.status(200).json({
+                    success: false,
+                    message: "No watch later found."
+                })
+            }
+
+
         } catch (error) {
             res.status(200).json({
                 success: false,

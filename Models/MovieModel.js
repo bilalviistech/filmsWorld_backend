@@ -28,6 +28,10 @@ const MovieSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    movieTrending: {
+        type: Boolean,
+        default: false
+    }
 
 })
 
