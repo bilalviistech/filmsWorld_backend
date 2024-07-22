@@ -68,17 +68,27 @@ class SeriesController{
     }
 
     static AddEpisodes = async (req, res) => {
+        const { episodeThumbnail, episodeVideo } = req.files;
         const { EpisodeTitle, EpisodeNumber }= req.body
+
         const seriesId = req.params.seriesid
 
         const currentDate = Date.now()
-        const EpisodeObj = req.file;
+        const EpisodeThumnailObj = episodeThumbnail[0];
+        const EpisodeVideoObj = episodeVideo[0];
 
-        const EpisodeParams = {
+        const EpisodeThumbnailParams = {
             Bucket: process.env.Bucketname,
-            Key: `Episode/${currentDate}_${EpisodeObj.originalname}`,
-            Body: EpisodeObj.buffer,
-            ContentType: EpisodeObj.mimetype,
+            Key: `Episode/${currentDate}_${EpisodeThumnailObj.originalname}`,
+            Body: EpisodeThumnailObj.buffer,
+            ContentType: EpisodeThumnailObj.mimetype,
+        };
+
+        const EpisodeVideoParams = {
+            Bucket: process.env.Bucketname,
+            Key: `Episode/${currentDate}_${EpisodeVideoObj.originalname}`,
+            Body: EpisodeVideoObj.buffer,
+            ContentType: EpisodeVideoObj.mimetype,
         };
 
         try{
@@ -86,19 +96,27 @@ class SeriesController{
 
             if(SeriesExist)
             {
-                const EpisodeUpload = new Upload({
+                const EpisodeThumbnailUpload = new Upload({
                     client: s3,
-                    params: EpisodeParams,
+                    params: EpisodeThumbnailParams,
                     leavePartsOnError: false,
                 });
-                await EpisodeUpload.done();
+                await EpisodeThumbnailUpload.done();
 
-                if(EpisodeUpload){
+                const EpisodeVideoUpload = new Upload({
+                    client: s3,
+                    params: EpisodeVideoParams,
+                    leavePartsOnError: false,
+                });
+                await EpisodeVideoUpload.done();
+
+                if(EpisodeThumbnailUpload){
                     const SeriesEpisodes = new Episodes({
                         _id: new mongoose.Types.ObjectId(),
                         EpisodeTitle: EpisodeTitle,
                         EpisodeNumber: EpisodeNumber,
-                        EpisodeImage: EpisodeParams.Key,
+                        EpisodeImage: EpisodeThumbnailParams.Key,
+                        EpisodeVideo: EpisodeVideoParams.Key,
                         SeriesId:seriesId
                     });
                     await SeriesEpisodes.save();

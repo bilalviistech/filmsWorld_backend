@@ -19,6 +19,10 @@ const EpisodesSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    EpisodeVideo:{
+        type: String,
+        required: true
+    },
 },{
     timestamps: true
 })

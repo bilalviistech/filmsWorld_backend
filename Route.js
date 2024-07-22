@@ -50,7 +50,8 @@ Route.post('/user/add-series', AuthMiddleware, upload.single('series'), SeriesCo
 Route.get('/user/get-series', AuthMiddleware, SeriesController.GetAllSeries)
 
 // Add episode
-Route.post('/user/addepisodes/:seriesid', AuthMiddleware, upload.single('episode'), SeriesController.AddEpisodes)
+// Route.post('/user/addepisodes/:seriesid', AuthMiddleware, upload.single('episode'), SeriesController.AddEpisodes)
+Route.post('/user/addepisodes/:seriesid', AuthMiddleware, upload.fields([ { name: 'episodeThumbnail', maxCount: 1 }, { name: 'episodeVideo', maxCount: 1 } ]), SeriesController.AddEpisodes)
 Route.get('/user/get-episodes-by-series/:SeriesId', AuthMiddleware, SeriesController.GetEpisodesBySeries)
 
 
