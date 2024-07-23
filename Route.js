@@ -48,6 +48,7 @@ Route.get('/user/get-banner', AuthMiddleware, MovieController.GetBanner)
 // Series
 Route.post('/user/add-series', AuthMiddleware, upload.single('series'), SeriesController.AddSeries)
 Route.get('/user/get-series', AuthMiddleware, SeriesController.GetAllSeries)
+Route.post('/admin/add-season/:SeasonID/:SeasonNumber', AuthMiddleware, SeriesController.AddSeason)
 
 // Add episode
 // Route.post('/user/addepisodes/:seriesid', AuthMiddleware, upload.single('episode'), SeriesController.AddEpisodes)

@@ -3,6 +3,7 @@ const { S3Client } = require('@aws-sdk/client-s3')
 const mongoose = require('mongoose')
 const Series = require('../Models/SeriesModel')
 const Episodes = require('../Models/EpisodesModel')
+const Season = require('../Models/SeasonModel')
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -194,6 +195,50 @@ class SeriesController{
             })
         }
 
+    }
+
+    static AddSeason = async (req, res) => {
+        const SeasonID = req.params.SeasonID
+        const SeasonNumber = req.params.SeasonNumber
+
+        try {
+            const SeasonExist = await Season.findOne({_id: SeasonID})
+            if(SeasonExist){
+                const SeasonNumberExist = await Season.findOne({ Season: { $in: [SeasonNumber] } })
+
+                if(SeasonNumberExist){
+                    return res.status(200).json({
+                        success: false,
+                        message: "Season already added."
+                    })
+                }
+    
+                await SeasonExist.updateOne({ $addToSet: { Season: SeasonNumber } })
+    
+                res.status(200).json({
+                    success: true,
+                    message: "Season add successfuly."
+                })
+            }
+            else{
+                const newSeason = new Season({
+                    _id: new mongoose.Types.ObjectId(),
+                    Season: SeasonNumber,
+                })
+                await newSeason.save()
+
+                res.status(200).json({
+                    success: true,
+                    message: "Season add successfuly."
+                })
+            }
+
+        } catch (error) {
+            res.status(200).json({
+                success: false,
+                message: error.message
+            })
+        }
     }
 
 }

@@ -313,16 +313,33 @@ class MovieController {
 
             const AllMovie = await Movie.paginate({ movieTitle: { $regex: title, $options: 'i' } }, { page: PageNumber, limit: PageLimitData })
 
-            res.status(200).json({
-                success: true,
-                data: AllMovie.docs,
-                totalDocs: AllMovie.totalDocs,
-                limit: AllMovie.limit,
-                totalPages: AllMovie.totalPages,
-                currentPage: AllMovie.page,
-                pagingCounter: AllMovie.pagingCounter,
-                nextPage: AllMovie.nextPage
-            })
+            if(AllMovie.docs.length > 0){
+                res.status(200).json({
+                    success: true,
+                    data: AllMovie.docs,
+                    totalDocs: AllMovie.totalDocs,
+                    limit: AllMovie.limit,
+                    totalPages: AllMovie.totalPages,
+                    currentPage: AllMovie.page,
+                    pagingCounter: AllMovie.pagingCounter,
+                    nextPage: AllMovie.nextPage
+                })
+            }
+            else{
+                const AllMovie = await Movie.aggregate([ { $sample: { size: 10 } } ]);
+
+                res.status(200).json({
+                    success: true,
+                    data: AllMovie,
+                    totalDocs: 10,
+                    limit: 10,
+                    totalPages: 1,
+                    currentPage: 1,
+                    pagingCounter: 1,
+                    nextPage: null
+                })
+            }
+
 
         } catch (error) {
             res.status(200).json({
