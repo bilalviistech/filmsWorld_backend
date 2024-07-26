@@ -7,6 +7,7 @@ const Banner = require('../Models/BannerModel')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const User = require('../Models/UserModel')
+const Suggestion = require('../Models/Suggestion')
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -358,6 +359,27 @@ class AuthController {
             clients = clients.filter(client => client !== res);
         });
     };
+
+    static Suggestion = async (req, res) => {
+        const {AnySuggestion} = req.body
+        try {
+            const newSuggestion =  new Suggestion ({
+                UserId: req.user._id,
+                AnySuggestion: AnySuggestion
+            })
+            await newSuggestion.save()
+    
+            res.status(200).json({
+                success: true,
+                message: "Your suggestion has been sent."
+            })
+        } catch (error) {
+            res.status(200).json({
+                success: false,
+                message: error.message
+            })
+        }
+    }
 }
 
 
