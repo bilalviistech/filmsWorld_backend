@@ -26,6 +26,7 @@ Route.post('/admin/trending-movie/:Movieid', AuthController.TrendingMovie);
 Route.post('/admin/events', AuthController.Events)
 Route.post('/admin/add-banner', upload.single('banner'), AuthController.AddBanner);
 Route.post('/admin/suggestion', AuthMiddleware, AuthController.Suggestion);
+Route.get('/admin/get-suggestion', AuthMiddleware, AuthController.GetAllSuggestion);
 
 // App Routes
 // Movie Routes

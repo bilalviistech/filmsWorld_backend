@@ -380,6 +380,33 @@ class AuthController {
             })
         }
     }
+
+    static GetAllSuggestion = async (req,res) =>{
+        try {
+            const GetAllSuggestion = await Suggestion.find()
+            let AllDetail = []
+
+            for(let i=0; i< GetAllSuggestion.length;i++){
+                const UserDetail = await User.findById(GetAllSuggestion[i].UserId)
+
+                AllDetail.push({
+                    name: UserDetail.name,
+                    email: UserDetail.email,
+                    AnySuggestion: GetAllSuggestion[i].AnySuggestion,
+                })
+            }
+
+            res.status(200).json({
+                success: true,
+                data: AllDetail
+            })
+        } catch (error) {
+            res.status(200).json({
+                success: false,
+                data: error.message
+            })
+        }
+    }
 }
 
 
