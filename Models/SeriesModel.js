@@ -9,7 +9,11 @@ const SeriesSchema = new mongoose.Schema({
     SeriesBanner: {
         type: String,
         // required: true
-    }
+    },
+    Season: {
+        type: Array,
+        // required: true
+    },
 
 },{
     timestamps: true

@@ -19,9 +19,10 @@ DB()
 Route.post('/user/register', AuthController.Register)
 Route.post('/user/social-auth-register', AuthController.SocialAuthRegister)
 Route.post('/user/login', AuthController.Login)
+Route.get('/user/get-all-user', AuthMiddleware, AuthController.GetAllUser)
 
 // Route.post('/admin/add-movie', upload.single('video'), PicUpload.single('thumbnail'), AuthController.AddMovie)
-Route.post('/admin/add-movie', upload.fields([ { name: 'video', maxCount: 1 }, { name: 'thumbnail', maxCount: 1 } ]), AuthController.AddMovie);
+Route.post('/admin/add-movie', upload.single('thumbnail'), AuthController.AddMovie);
 Route.post('/admin/trending-movie/:Movieid', AuthController.TrendingMovie);
 Route.post('/admin/events', AuthController.Events)
 Route.post('/admin/add-banner', upload.single('banner'), AuthController.AddBanner);
@@ -50,11 +51,11 @@ Route.get('/user/get-banner', AuthMiddleware, MovieController.GetBanner)
 // Series
 Route.post('/user/add-series', AuthMiddleware, upload.single('series'), SeriesController.AddSeries)
 Route.get('/user/get-series', AuthMiddleware, SeriesController.GetAllSeries)
-Route.post('/admin/add-season/:SeasonID/:SeasonNumber', AuthMiddleware, SeriesController.AddSeason)
+Route.post('/admin/add-season/:SeriesID/:SeasonNumber', AuthMiddleware, SeriesController.AddSeason)
+Route.get('/admin/get-all-season-by-series/:seriesId', AuthMiddleware, SeriesController.GetAllSeasonBySeries)
 
 // Add episode
-// Route.post('/user/addepisodes/:seriesid', AuthMiddleware, upload.single('episode'), SeriesController.AddEpisodes)
-Route.post('/user/addepisodes/:seriesid', AuthMiddleware, upload.fields([ { name: 'episodeThumbnail', maxCount: 1 }, { name: 'episodeVideo', maxCount: 1 } ]), SeriesController.AddEpisodes)
+Route.post('/user/addepisodes', AuthMiddleware, upload.single('episodeThumbnail'), SeriesController.AddEpisodes)
 Route.get('/user/get-episodes-by-series/:SeriesId', AuthMiddleware, SeriesController.GetEpisodesBySeries)
 
 

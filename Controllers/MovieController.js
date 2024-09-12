@@ -2,6 +2,7 @@ const Movie = require('../Models/MovieModel')
 const Favorite = require('../Models/FavoriteMovieModel');
 const Banner = require('../Models/BannerModel')
 const Watched = require('../Models/WatchedModel')
+const SeriesModel = require('../Models/SeriesModel')
 const mongoose = require('mongoose')
 const dotenv = require('dotenv')
 dotenv.config()

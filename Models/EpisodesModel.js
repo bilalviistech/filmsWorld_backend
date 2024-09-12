@@ -7,6 +7,10 @@ const EpisodesSchema = new mongoose.Schema({
         ref: "Series",
         required: true
     },
+    seasonNo:{
+        type: String,
+        required: true
+    },
     EpisodeTitle:{
         type: String,
         required: true

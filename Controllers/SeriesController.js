@@ -68,41 +68,80 @@ class SeriesController{
         }
     }
 
+    // static AddSeason = async (req, res) => {
+    //     const SeasonID = req.params.SeasonID
+    //     const SeasonNumber = req.params.SeasonNumber
+
+    //     try {
+    //         const SeasonExist = await Season.findOne({_id: SeasonID})
+    //         if(SeasonExist){
+    //             const SeasonNumberExist = await Season.findOne({ Season: { $in: [SeasonNumber] } })
+
+    //             if(SeasonNumberExist){
+    //                 return res.status(200).json({
+    //                     success: false,
+    //                     message: "Season already added."
+    //                 })
+    //             }
+    
+    //             await SeasonExist.updateOne({ $addToSet: { Season: SeasonNumber } })
+    
+    //             res.status(200).json({
+    //                 success: true,
+    //                 message: "Season add successfuly."
+    //             })
+    //         }
+    //         else{
+    //             const newSeason = new Season({
+    //                 _id: new mongoose.Types.ObjectId(),
+    //                 Season: SeasonNumber,
+    //             })
+    //             await newSeason.save()
+
+    //             res.status(200).json({
+    //                 success: true,
+    //                 message: "Season add successfuly."
+    //             })
+    //         }
+
+    //     } catch (error) {
+    //         res.status(200).json({
+    //             success: false,
+    //             message: error.message
+    //         })
+    //     }
+    // }
+
     static AddSeason = async (req, res) => {
-        const SeasonID = req.params.SeasonID
+        const SeriesID = req.params.SeriesID
         const SeasonNumber = req.params.SeasonNumber
 
         try {
-            const SeasonExist = await Season.findOne({_id: SeasonID})
-            if(SeasonExist){
-                const SeasonNumberExist = await Season.findOne({ Season: { $in: [SeasonNumber] } })
+            const SeriesExist = await Series.findOne({_id: SeriesID})
+            if(!SeriesExist){
+                return res.status(200).json({
+                    success: false,
+                    message: "Series doesn't exist."
+                })
+            }  
 
-                if(SeasonNumberExist){
-                    return res.status(200).json({
-                        success: false,
-                        message: "Season already added."
-                    })
-                }
-    
-                await SeasonExist.updateOne({ $addToSet: { Season: SeasonNumber } })
-    
-                res.status(200).json({
-                    success: true,
-                    message: "Season add successfuly."
-                })
+            // Check if the season number already exists
+            const seasonExists = SeriesExist.Season.find(e => e == SeasonNumber);
+            if (seasonExists) {
+                return res.status(200).json({
+                    success: false,
+                    message: "This season has already been added to the series."
+                });
             }
-            else{
-                const newSeason = new Season({
-                    _id: new mongoose.Types.ObjectId(),
-                    Season: SeasonNumber,
-                })
-                await newSeason.save()
+    
+            // Add the new season number to the series
+            SeriesExist.Season.push(SeasonNumber);
+            await SeriesExist.save();
 
-                res.status(200).json({
-                    success: true,
-                    message: "Season add successfuly."
-                })
-            }
+            res.status(200).json({
+                success: true,
+                message: "Season added successfuly."
+            })
 
         } catch (error) {
             res.status(200).json({
@@ -113,27 +152,16 @@ class SeriesController{
     }
 
     static AddEpisodes = async (req, res) => {
-        const { episodeThumbnail, episodeVideo } = req.files;
-        const { EpisodeTitle, EpisodeNumber }= req.body
-
-        const seriesId = req.params.seriesid
+        const episodeThumbnail = req.file;
+        const { EpisodeTitle, EpisodeNumber, seriesId, EpisodeVideoLink, seasonNo }= req.body
 
         const currentDate = Date.now()
-        const EpisodeThumnailObj = episodeThumbnail[0];
-        const EpisodeVideoObj = episodeVideo[0];
 
         const EpisodeThumbnailParams = {
             Bucket: process.env.Bucketname,
-            Key: `Episode/${currentDate}_${EpisodeThumnailObj.originalname}`,
-            Body: EpisodeThumnailObj.buffer,
-            ContentType: EpisodeThumnailObj.mimetype,
-        };
-
-        const EpisodeVideoParams = {
-            Bucket: process.env.Bucketname,
-            Key: `Episode/${currentDate}_${EpisodeVideoObj.originalname}`,
-            Body: EpisodeVideoObj.buffer,
-            ContentType: EpisodeVideoObj.mimetype,
+            Key: `Episode/${currentDate}_${episodeThumbnail.originalname}`,
+            Body: episodeThumbnail.buffer,
+            ContentType: episodeThumbnail.mimetype,
         };
 
         try{
@@ -148,20 +176,14 @@ class SeriesController{
                 });
                 await EpisodeThumbnailUpload.done();
 
-                const EpisodeVideoUpload = new Upload({
-                    client: s3,
-                    params: EpisodeVideoParams,
-                    leavePartsOnError: false,
-                });
-                await EpisodeVideoUpload.done();
-
-                if(EpisodeThumbnailUpload && EpisodeVideoUpload){
+                if(EpisodeThumbnailUpload){
                     const SeriesEpisodes = new Episodes({
                         _id: new mongoose.Types.ObjectId(),
                         EpisodeTitle: EpisodeTitle,
                         EpisodeNumber: EpisodeNumber,
                         EpisodeImage: EpisodeThumbnailParams.Key,
-                        EpisodeVideo: EpisodeVideoParams.Key,
+                        EpisodeVideo: EpisodeVideoLink,
+                        seasonNo: seasonNo,
                         SeriesId:seriesId
                     });
                     await SeriesEpisodes.save();
@@ -241,7 +263,21 @@ class SeriesController{
 
     }
 
-
+    static GetAllSeasonBySeries = async(req, res)=>{
+        const seriesId = req.params.seriesId
+        try {
+            const GetAllSeasonBySeries = await Series.findOne({_id: seriesId})
+            res.status(200).json({
+                success: true,
+                data: GetAllSeasonBySeries
+            })
+        } catch (error) {
+            res.status(200).json({
+                success: false,
+                data: error.message
+            })
+        }
+    }
 
 }
 module.exports = SeriesController
