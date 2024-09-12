@@ -28,7 +28,7 @@ class SeriesController{
 
         const SeriesParams = {
             Bucket: process.env.Bucketname,
-            Key: `Series/${currentDate}_${SeriesObj.originalname}`,
+            Key: `Series/Thumbnail/${currentDate}_${SeriesObj.originalname}`,
             Body: SeriesObj.buffer,
             ContentType: SeriesObj.mimetype,
         };
@@ -159,7 +159,7 @@ class SeriesController{
 
         const EpisodeThumbnailParams = {
             Bucket: process.env.Bucketname,
-            Key: `Episode/${currentDate}_${episodeThumbnail.originalname}`,
+            Key: `Episode/Thumbnail/${currentDate}_${episodeThumbnail.originalname}`,
             Body: episodeThumbnail.buffer,
             ContentType: episodeThumbnail.mimetype,
         };
